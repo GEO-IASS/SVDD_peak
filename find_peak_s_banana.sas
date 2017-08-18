@@ -1,19 +1,8 @@
 
-/*Finds peak s for banana dataset*/
+/*Finds peak s for banana dataset, CAS version*/
 
+/*Assume CAS is already setup*/
 
-libname dataset "U:\dev\FISVDD\data";
-
-
-data trainSet;
-	set banana;
-run;
-
-/*SVDD WITH LOOP FOR MULTIPLE S VALUES;*/
-
-/*Setup CAS*/
-%let sysparm=runcas:ls+pbox:nd+host:rdcgrd033;
-%cassetup; 
 
 data sascas1.trainds;
 set trainSet;
@@ -75,11 +64,6 @@ quit;
 %mend _call;
 
 %_call;
-
-/*Close CAS*/
-%casclear;
-
-
 
 
 
