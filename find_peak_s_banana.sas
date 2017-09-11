@@ -1,11 +1,12 @@
-
+﻿
 /*Finds peak s for banana dataset, CAS version*/
 
 /*Assume CAS is already setup*/
-
+%let sysparm=runcas:ls;
+%cassetup;
 
 data sascas1.trainds;
-set trainSet;
+set banana;
 run;
 
 %let sStart = 0.5;
@@ -27,13 +28,14 @@ quit;
 
 /*Run PROC SVDD on different s*/
 
-%do i=1 %to 70;
+%do i=1 %to 100;
     %let s=%sysevalf (&sStart.+&i.*&sby.-&sby.);
     ods listing close;
     ods output trainingresults=tr;
     proc svdd data=sascas1.trainds outsv=sascas1.dk; 
     	input x1 x2; 
         kernel rbf / bw=&s.;
+		solver actset / stol = %sysevalf(10**-15);
 		savestate rstore=sascas1.state_s;
     run;
 
@@ -77,13 +79,12 @@ quit;
 
 /* Take the second derivative of last_term */
 data dk;
-    set &inds;
+    set mySummary2;
     l1_last_term=lag(last_term);
     l2_last_term=lag2(last_term);
-    if _n_ > 1 then d_last_term = (last_term - l1_last_term)/(&sby);
+	if _n_ > 1 then d_last_term = (last_term - l1_last_term)/(&sby);
     if _n_ > 2 then d2_last_term = (last_term - 2 * l1_last_term + l2_last_term) / ( &sby * &sby ) ;
 run;
-
 
 data dk;
 	set dk;
@@ -254,7 +255,6 @@ quit;
     run;
 %mend a;
 
-options mprint mlogic symbolgen;
 data mySummary (keep= s radius);
 	set summary;
 run;
@@ -265,4 +265,6 @@ data mySummary2 (rename=(radius=last_term));
 run;
 
 %a(inds=mySummary2,sby=0.01);
+
+%casclear;
 
